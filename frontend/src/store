@@ -1,0 +1,16 @@
+import { defineStore } from 'pinia'
+import { api } from './api'
+
+export const useStore = defineStore('counter', {
+  state: () => {
+    return {
+      user: null
+    }
+  },
+
+  actions: {
+    async getUser() {
+      this.user = await api.me()
+    }
+  },
+})

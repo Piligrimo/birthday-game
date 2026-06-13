@@ -1,10 +1,9 @@
 <script setup>
-import Login from './components/Login.vue'
 </script>
 
 <template>
   <h1>Казино Максон</h1>
-  <Login />
+  <RouterView></RouterView>
 </template>
 
 <style>
