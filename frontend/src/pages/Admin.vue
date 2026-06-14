@@ -38,12 +38,12 @@
       <p class="menu-item" @click="router.push('/')">Назад</p> 
     </div>
     <template v-if="tab === 'new-user'">
-      <input v-model="newUser" type="text" placeholder="Имя">
-      <button @click="addUser">Добавить</button>
+      <input v-model="newUser" class="pixel-border" type="text" placeholder="Имя">
+      <button class="pixel-border" @click="addUser">Добавить</button>
     </template>
     <template v-if="tab === 'money'" placeholder="Сумма">
-      <input v-model="sum" type="number" step="1">
-      <button @click="sendMoney">Отправить фишки</button>
+      <input v-model="sum" class="pixel-border" type="number" step="1">
+      <button class="pixel-border" @click="sendMoney">Отправить фишки</button>
     </template>
     <table>
       <tr v-for="user in users" :class="{chosen: user.id === selectedUserId}" :key="user.id">

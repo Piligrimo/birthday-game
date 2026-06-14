@@ -18,10 +18,10 @@ const signIn = async () => {
 
 <template>
   <h3>Логин</h3>
-  <p class="hint">Максон сказал тебе секретный код скопируй его в поле ниже.</p>
+  <p class="hint">Максон сказал тебе секретный код скопируй его в поле ниже</p>
   <p class="hint secondary">(если не сказал, тебя здесь не ждут)</p>
-  <input v-model="code" type="text" placeholder="Секретный код"/>
-  <button @click="signIn"> Войти</button>
+  <input class="pixel-border" v-model="code" type="text" placeholder="Секретный код"/>
+  <button class="pixel-border" @click="signIn"> Войти</button>
 </template>
 
 <style>

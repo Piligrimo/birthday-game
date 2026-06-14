@@ -36,17 +36,17 @@ import { api } from '../api';
       <p>{{ store.user.chips }}</p>
       <img class="chip" :src="chipImg" alt="chip">
     </div>
-    <input v-model="sum" type="number" step="1"  min="1" :max="store.user.chips">
-    <button @click="sendMoney">Отправить фишки</button>
+    <input class="pixel-border" v-model="sum" type="number" step="1"  min="1" :max="store.user.chips">
+    <button class="pixel-border" @click="sendMoney">Отправить фишки</button>
     <table>
       <tr v-for="user in users" :class="{chosen: user.id === selectedUserId}" :key="user.id">
         <td align="left" @click="selectedUserId = user.id">{{user.name}}</td>
         <td align="right">{{user.chips}} <img class="chip" :src="chipImg" alt="chip"></td>
       </tr>
     </table>
-    <button @click="logOff">Выйти</button>
+    <button class="pixel-border" @click="logOff">Выйти</button>
     <RouterLink to="/admin">
-      <button v-if="store.user.isAdmin">Админка</button>
+      <button class="pixel-border" v-if="store.user.isAdmin">Админка</button>
     </RouterLink>
 </template>
 
