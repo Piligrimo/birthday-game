@@ -10,6 +10,8 @@ export const useStore = defineStore('counter', {
 
   actions: {
     async getUser() {
+      console.log('getUser');
+      
       this.user = await api.me()
     }
   },

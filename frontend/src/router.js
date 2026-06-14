@@ -3,9 +3,11 @@ import { createWebHashHistory, createRouter } from 'vue-router'
 import MainPage from './pages/MainPage.vue'
 import LogIn from './pages/LogIn.vue'
 import { useStore } from './store'
+import Admin from './pages/Admin.vue'
 
 const routes = [
   { path: '/', component: MainPage, meta: {shouldBeAuthed: true} },
+  { path: '/admin', component: Admin, meta: {shouldBeAuthed: true, admin: true} },
   { path: '/login', component: LogIn, meta: {shouldBeAuthed: false} },
 ]
 
@@ -23,19 +25,19 @@ router.beforeEach(async (to, from) => {
   
   if (!store.user) {
     await store.getUser()
-    console.log(store.user, to.meta.shouldBeAuthed );
-    
   }
 
   if(to.meta.shouldBeAuthed && !store.user) {
-    console.log('here')
     return '/login'
   }
+
   if (!to.meta.shouldBeAuthed && store.user) {
-    console.log('there')
     return '/'
   }
-    console.log('none')
-   return
+
+  if (to.meta.admin && !store.user?.isAdmin)
+    return '/'
+
+  return
 
 })

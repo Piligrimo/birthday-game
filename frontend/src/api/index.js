@@ -40,5 +40,25 @@ export const api = {
             console.error(e)
             throw e
         }
+    },
+
+    async addUser(name) {
+        try {
+            const { data } = await instance.post('/user', { name })
+            return data.user
+        } catch (e) {
+            console.error(e)
+            throw e
+        }
+    },
+
+    async sendChips(recieverId, sum) {
+        try {
+            const token = localStorage.getItem('token')
+            const { data } = await instance.put('/send-chips', { recieverId, sum }, {headers: {token}})
+        } catch (e) {
+            console.error(e)
+            throw e
+        }
     }
 }

@@ -22,7 +22,9 @@
     align-items: center;
   }
 
+  button,
   input {
     max-width: 200px;
+    margin: 8px 0;
   }
 </style>

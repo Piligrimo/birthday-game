@@ -34,7 +34,7 @@ const manageCurrentUser = (token, res, cb) => {
 
 const createSession = (userId, db) => {
     const token = String(Number.parseInt(Math.floor(Math.random()*99999999999)))
-    db.run(`DELETE from sessions WHERE userId = '${userId}'`)
+    db.run(`DELETE from sessions WHERE userId=?`,[userId])
     db.run(
         'INSERT INTO sessions(userId, token) VALUES(?,?)',
         [userId, token],
@@ -55,10 +55,8 @@ app.listen(port, () => {
 
 app.get('/users', (req, res) => {
     db.all(`SELECT * FROM users`,(err, users) => {
-        db.all(`SELECT * FROM sessions`,(err, sessions) => {
         if (err) { return console.error(err)}
-        res.status(200).send({users, sessions})
-    })
+        res.status(200).send(users)
     })
 })
 
@@ -99,11 +97,54 @@ app.post('/user', async (req, res) => {
             const code = String(Math.floor(Math.random()*9999999)).padStart(7, '0');
             
             db.run(
-                'INSERT INTO users( name, code, chips, lotteryTicket) VALUES(?,?,?,?,?)',
+                'INSERT INTO users( name, code, chips, lotteryTicket, isAdmin) VALUES(?,?,?,?,?)',
                 [name, code, 1000, "", false],
-                (err) => {if (err) { return console.error(err)}}
+                (err) => {
+                    if (err) { return console.error(err) }
+                    res.status(200)
+                }
             )
-            res.status(200)
         }
+    })
+})
+
+
+app.put('/send-chips', (req, res) => {
+    const token = req.get('token')
+    const {recieverId, sum} = req.body
+
+    manageCurrentUser(token, req, (giver) => {
+        if (giver) {
+            db.get(`SELECT * from users WHERE id=?`,[recieverId],(err, reciever) => {
+                if (err) { return console.error(err)}
+                console.log({giver, reciever})
+                if (reciever) {
+                    if (!giver.isAdmin) {
+                        if (giver.chips < sum) {
+                            console.log(`Недостаточно денег (${giver.chip} < ${sum})`)
+
+                            res.status(400).send({message: 'У тебя столько нет'})
+                            return
+                        }
+                        if (sum < 0) {
+                            res.status(400).send({message: 'Илья, не знаю как, но знаю что это ты'})
+                            return
+                        }
+                        db.run(`UPDATE users SET chips = ? WHERE id = ?`, [giver.chips - sum, giver.id], (err) => {
+                            if (err) { return console.error(err)}
+                            db.run(`UPDATE users SET chips = ? WHERE id = ?`, [reciever.chips + sum, recieverId], (err) => {
+                                if (err) { return console.error(err)}
+                                res.status(200).send('ok')
+                            })
+                        })
+                    } else {
+                        db.run(`UPDATE users SET chips = ? WHERE id = ?`, [reciever.chips + sum, recieverId],(err) => {
+                            if (err) { return console.error(err)}
+                            res.status(200).send('ok but admin')
+                        })
+                    }
+                } 
+            })
+        } 
     })
 })
