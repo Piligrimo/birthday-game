@@ -60,5 +60,15 @@ export const api = {
             console.error(e)
             throw e
         }
+    },
+
+    async setLotteryTicket(lotteryTicket) {
+        try {
+            const token = localStorage.getItem('token')
+            const { data } = await instance.put('/lottery', { lotteryTicket }, {headers: {token}})
+        } catch (e) {
+            console.error(e)
+            throw e
+        }
     }
 }

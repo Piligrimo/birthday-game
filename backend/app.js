@@ -18,7 +18,27 @@ const db = new sqlite3.Database(
 //     (err) => {if (err) { return console.error(err)}}
 // )
 
-const manageCurrentUser = (token, res, cb) => {
+function dbGet(sql, params = []) {
+    return new Promise((resolve, reject) => {
+        db.get(sql, params, (err, row) => {
+            if (err) reject(err)
+            else resolve(row)
+        })
+    })
+}
+
+function dbRun(sql, params = []) {
+    return new Promise((resolve, reject) => {
+        db.run(sql, params, function(err) {
+            if (err) reject(err)
+            else resolve(this)
+        })
+    })
+}
+
+const manageCurrentUser = (req, res, cb) => {
+    const token = req.get('token')
+
     db.get(`SELECT * from sessions WHERE token='${token}'`,(err, session) => {
         if (err) { return console.error(err)}
         if (session) { 
@@ -75,8 +95,7 @@ app.post('/login', (req, res) => {
 })
 
 app.get('/me', (req, res) => {
-    const token = req.get('token')
-    manageCurrentUser(token, res, (user) => {
+    manageCurrentUser(req, res, (user) => {
         if (user) { 
             res.status(200).send(user)
         } else {
@@ -108,43 +127,73 @@ app.post('/user', async (req, res) => {
     })
 })
 
+app.put('/send-chips', async (req, res) => {
+    try {
+        const { recieverId, sum } = req.body
 
-app.put('/send-chips', (req, res) => {
-    const token = req.get('token')
-    const {recieverId, sum} = req.body
+        manageCurrentUser(req, res, async (giver) => {
+            try {
+                if (!giver) {
+                    return res.status(401).send({ message: 'Не авторизован' })
+                }
 
-    manageCurrentUser(token, req, (giver) => {
-        if (giver) {
-            db.get(`SELECT * from users WHERE id=?`,[recieverId],(err, reciever) => {
-                if (err) { return console.error(err)}
-                console.log({giver, reciever})
-                if (reciever) {
-                    if (!giver.isAdmin) {
-                        if (giver.chips < sum) {
-                            console.log(`Недостаточно денег (${giver.chip} < ${sum})`)
+                const reciever = await dbGet(
+                    'SELECT * FROM users WHERE id = ?',
+                    [recieverId]
+                )
 
-                            res.status(400).send({message: 'У тебя столько нет'})
-                            return
-                        }
-                        if (sum < 0) {
-                            res.status(400).send({message: 'Илья, не знаю как, но знаю что это ты'})
-                            return
-                        }
-                        db.run(`UPDATE users SET chips = ? WHERE id = ?`, [giver.chips - sum, giver.id], (err) => {
-                            if (err) { return console.error(err)}
-                            db.run(`UPDATE users SET chips = ? WHERE id = ?`, [reciever.chips + sum, recieverId], (err) => {
-                                if (err) { return console.error(err)}
-                                res.status(200).send('ok')
-                            })
-                        })
-                    } else {
-                        db.run(`UPDATE users SET chips = ? WHERE id = ?`, [reciever.chips + sum, recieverId],(err) => {
-                            if (err) { return console.error(err)}
-                            res.status(200).send('ok but admin')
+                if (!reciever) {
+                    return res.status(404).send({ message: 'Пользователь не найден' })
+                }
+
+                if (!giver.isAdmin) {
+                    if (giver.chips < sum) {
+                        return res.status(400).send({
+                            message: 'У тебя столько нет'
                         })
                     }
-                } 
-            })
-        } 
+
+                    if (sum < 0) {
+                        return res.status(400).send({
+                            message: 'Илья, не знаю как, но знаю что это ты'
+                        })
+                    }
+
+                    await dbRun(
+                        'UPDATE users SET chips = ? WHERE id = ?',
+                        [giver.chips - sum, giver.id]
+                    )
+                }
+
+                await dbRun(
+                    'UPDATE users SET chips = ? WHERE id = ?',
+                    [reciever.chips + sum, recieverId]
+                )
+
+                res.status(200).send(
+                    giver.isAdmin ? 'ok but admin' : 'ok'
+                )
+            } catch (err) {
+                console.error(err)
+                res.status(500).send({ message: 'Ошибка сервера' })
+            }
+        })
+    } catch (err) {
+        console.error(err)
+        res.status(500).send({ message: 'Ошибка сервера' })
+    }
+})
+
+app.put('/lottery', async (req, res) => {
+    const {lotteryTicket} = req.body
+    manageCurrentUser(req,res, async (user) => {
+        if (user.lotteryTicket) {
+            return res.status(400).send({ message: 'Символы нельзя поменять после сохранения' })
+        }
+        await dbRun(
+            'UPDATE users SET lotteryTicket = ? WHERE id = ?',
+            [lotteryTicket, user.id]
+        )
+        res.status(200).send('ok')
     })
 })

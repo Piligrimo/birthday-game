@@ -4,9 +4,26 @@ import MainPage from './pages/MainPage.vue'
 import LogIn from './pages/LogIn.vue'
 import { useStore } from './store'
 import Admin from './pages/Admin.vue'
+import SendingMoney from './pages/SendingMoney.vue'
+import Lottery from './pages/Lottery.vue'
 
 const routes = [
-  { path: '/', component: MainPage, meta: {shouldBeAuthed: true} },
+  { path: '/', redirect: '/my/sending', meta: {shouldBeAuthed: true} },
+  { 
+    path: '/my', 
+    component: MainPage, 
+    children: [
+      { 
+        path: 'sending', 
+        component: SendingMoney, 
+      },
+      { 
+        path: 'lottery', 
+        component: Lottery, 
+      },
+    ],
+    meta: {shouldBeAuthed: true},
+  },
   { path: '/admin', component: Admin, meta: {shouldBeAuthed: true, admin: true} },
   { path: '/login', component: LogIn, meta: {shouldBeAuthed: false} },
 ]

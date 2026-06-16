@@ -42,14 +42,23 @@
 
   :root {
     --pixel-color: #6a83a1;
-    --pixel-width: 2px;
+    --pixel-width: 4px;
   }
 
   button {
     --pixel-color: #908818;
     background-color: #ede026;
     color: #58530a;
+  }
 
+  button:disabled {
+    --pixel-color: #343434;
+    background-color: #949494;
+    color: #343434;
+  }
+
+  button:active {
+    transform: translate(0,var(--pixel-width));
   }
 
   button,
@@ -84,5 +93,34 @@
       0px calc(var(--pixel-width) * -1) 0px 0px var(--pixel-color),
       calc(var(--pixel-width) * -1) 0px 0px 0px var(--pixel-color),
       var(--pixel-width) 0px 0px 0px var(--pixel-color);
+  }
+
+  .chosen {
+    color: #fff71d;
+  }
+  .hint {
+    font-size: 11px;
+  }
+  .hint.secondary {
+    font-size: 8px;
+  }
+
+  .menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .menu-item {
+    font-size: 10px;
+    color: #dbf3e5;
+  }
+   .menu-item:visited {
+    color: #dbf3e5;
+   }
+
+  .menu-item:hover {
+    opacity: 0.8;
   }
 </style>

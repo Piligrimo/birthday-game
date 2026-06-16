@@ -24,11 +24,5 @@ const signIn = async () => {
   <button class="pixel-border" @click="signIn"> Войти</button>
 </template>
 
-<style>
-.hint {
-  font-size: 11px;
-}
-.hint.secondary {
-  font-size: 8px;
-}
+<style scoped>
 </style>

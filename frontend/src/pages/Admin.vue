@@ -54,7 +54,7 @@
     
 </template>
 
-<style>
+<style scoped>
 .chip {
   height: 16px;
 }
@@ -63,25 +63,5 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-}
-
-.menu {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 4px;
-}
-
-.menu-item {
-  font-size: 10px;
-  cursor: pointer;
-}
-
-.menu-item:hover {
-  opacity: 0.8;
-}
-
-.chosen {
-  color: rgb(255, 247, 29);
 }
 </style>
