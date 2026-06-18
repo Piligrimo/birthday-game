@@ -14,7 +14,7 @@
 
   const store = useStore()
 
-  const winningCombination = ['bell', 'seven', 'seven']
+  const winningCombination = ref(null)
 
   const images = { bell, cherry, clover, diamond, horseshoe, lemon, seven }
 
@@ -23,7 +23,7 @@
 
   const spin = (slotIndex, iterationsLeft, delay) => {
     if (iterationsLeft < 0) {
-      symbols.value[slotIndex] = winningCombination[slotIndex]
+      symbols.value[slotIndex] = winningCombination.value[slotIndex]
       finishedIndexes.value[slotIndex] = true
       if (finishedIndexes.value.every(Boolean)) {
         allFinished.value = true
@@ -50,18 +50,23 @@
 
   const symbols = ref(['seven','seven','seven'])
   
-  const beginSpinning = () => {
+  const beginSpinning = async () => {
+    const {winners, combination} = await api.getLotteryWinners()
+    console.log({winners, combination});
+    
+    winningCombination.value = combination.split(',')
+    allFinished.value = false
     finishedIndexes.value = [false, false, false]
     setTimeout(()=> {
-      spin(0,50, 100)
-    }, 10)
-    setTimeout(()=> {
-      spin(1,40, 110)
-
-    }, 30)
-    setTimeout(()=> {
-      spin(2,65, 90)
+      spin(0,50, 40)
     }, 100)
+    setTimeout(()=> {
+      spin(1,40, 70)
+
+    }, 400)
+    setTimeout(()=> {
+      spin(2,65, 30)
+    }, 700)
   }
 
 </script>
@@ -79,11 +84,10 @@
       <img :src="images[symbols[i-1]]" :key="symbols[i-1]" :alt="symbols[i-1]">
     </Transition>
     </div>
-    <button class="pixel-border" @click="beginSpinning">Крутим</button>
-    <div v-if="allFinished" class="confetti">
-      <img :src="confetti" >
-    </div>
-   
+  </div>
+  <button class="pixel-border" @click="beginSpinning">Крутим</button>
+  <div v-if="allFinished" class="confetti">
+    <img :src="confetti" >
   </div>
 </template>
 
@@ -92,7 +96,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 16px;
+    gap: 30px;
     margin: 16px 0;
   }
 
@@ -100,10 +104,11 @@
   .box {
     background-color: #565a5e;
     --pixel-color: #485361;
+    --pixel-width: 10px;
   }
   .slot {
-    height: 50px;
-    width: 50px;
+    height: 150px;
+    width: 150px;
     overflow: hidden;
   }
 
@@ -125,15 +130,15 @@
   }
 
   .slide-up-enter-from {
-    opacity: 0;
-    transform: translateY(30px);
-    filter: blur(10px);
+    opacity: 0.5;
+    transform: translateY(100px);
+    filter: blur(20px);
   }
 
   .slide-up-leave-to {
-    opacity: 0;
-    filter: blur(10px);
-    transform: translateY(-30px);
+    opacity: 0.5;
+    filter: blur(20px);
+    transform: translateY(-100px);
   }
   .slot.selected {
     --pixel-color: #fff71d;

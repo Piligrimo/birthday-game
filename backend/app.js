@@ -11,7 +11,7 @@ const db = new sqlite3.Database(
 //db.run('CREATE TABLE users(id INTEGER PRIMARY KEY, name, code, chips, lotteryTicket)')
 //db.run('ALTER TABLE users ADD isAdmin')
 //db.run('CREATE TABLE sessions(id INTEGER PRIMARY KEY, userId, token)')
-// db.run('DELETE FROM users')
+//db.run('DELETE FROM users WHERE id != ?', [1])
 // db.run(
 //     'INSERT INTO users( name, code, chips, lotteryTicket, isAdmin) VALUES(?,?,?,?,?)',
 //     ['Макин', "7777777", 7777777, "", true],
@@ -23,6 +23,15 @@ function dbGet(sql, params = []) {
         db.get(sql, params, (err, row) => {
             if (err) reject(err)
             else resolve(row)
+        })
+    })
+}
+
+function dbGetAll(sql, params = []) {
+    return new Promise((resolve, reject) => {
+        db.all(sql, params, (err, rows) => {
+            if (err) reject(err)
+            else resolve(rows)
         })
     })
 }
@@ -62,6 +71,9 @@ const createSession = (userId, db) => {
     )
     return token
 }
+
+const symbols =  ['bell', 'cherry', 'clover', 'diamond', 'horseshoe', 'lemon', 'seven' ]
+
 
 const app = express()
 const port = 8081
@@ -120,7 +132,9 @@ app.post('/user', async (req, res) => {
                 [name, code, 1000, "", false],
                 (err) => {
                     if (err) { return console.error(err) }
-                    res.status(200)
+                    console.log('smth');
+                    
+                    res.status(200).send('ok')
                 }
             )
         }
@@ -196,4 +210,28 @@ app.put('/lottery', async (req, res) => {
         )
         res.status(200).send('ok')
     })
+})
+
+app.get('/lottery-winners', async (req, res) => {
+    const winningSymbols = []
+    for (let i = 0; i < 3; i++) {
+        let random = Math.floor(Math.random() * symbols.length)
+        winningSymbols.push(symbols[random])
+    }
+
+    const winningCombination = winningSymbols.join(',')
+
+    const users = await dbGetAll(`SELECT * FROM users`)
+    const winners = []
+
+    users.forEach((user) => {
+        const sortedTicket = user.lotteryTicket.split(',').sort().join(',');
+        const sortedWinningCombination = winningCombination.split(',').sort().join(',')
+        if (sortedTicket === sortedWinningCombination) {
+            winners.push(user)
+        }
+    })
+
+
+    res.status(200).send({combination: winningCombination, winners})
 })

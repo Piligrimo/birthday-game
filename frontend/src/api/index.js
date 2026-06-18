@@ -15,7 +15,6 @@ export const api = {
         try {
             const token = localStorage.getItem('token')
             const { data } = await instance.get('/me', {headers: {token}})
-            console.log(data);
             return data
         } catch (e) {
             console.error(e)
@@ -66,6 +65,19 @@ export const api = {
         try {
             const token = localStorage.getItem('token')
             const { data } = await instance.put('/lottery', { lotteryTicket }, {headers: {token}})
+        } catch (e) {
+            console.error(e)
+            throw e
+        }
+    },
+
+    async getLotteryWinners() {
+        try {
+
+            const { data } = await instance.get('/lottery-winners')
+            console.log('getLotteryWinners',data);
+            
+            return data
         } catch (e) {
             console.error(e)
             throw e
