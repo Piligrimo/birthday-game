@@ -24,12 +24,6 @@
 
   onMounted(async () => {
     users.value = await api.getUsers()
-    console.log(JSON.stringify(users.value.reduce((acc,{name, code})=> {
-      return {
-        [name]: code,
-        ...acc
-      }
-    }, {})))
     
   })
 </script>

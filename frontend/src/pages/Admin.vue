@@ -21,24 +21,11 @@ import Karaoke from '../components/Karaoke.vue';
     await api.addUser(newUser.value)
     users.value = await api.getUsers()    
   }
-  //const s =  ['bell', 'cherry', 'clover', 'diamond', 'horseshoe', 'lemon', 'seven' ]
   const s =  ['bell', 'clover', 'seven' ]
 
 
   const madShitDebug = () => {
-    let total = 0
-    const combinations = new Set()
-    for (let i = 0; i < s.length; i++) {
-        for (let j = 0; j < s.length; j++) {
-            for (let k = 0; k < s.length; k++) {
-                const symbols = [s[i],s[j],s[k]].sort()
-                total++
-                combinations.add(symbols.join('-'))
-            }
-        }
-    }
-    console.log(combinations, total);
-    
+    store.notifyRecieveChips('Максон', 200)    
   }
 
   const sendMoney = async () => {

@@ -5,7 +5,8 @@
   import { useRouter } from 'vue-router';
   import chipImg from '../assets/chip.png'
   import { api } from '../api';
-
+  import { handleSocketConnection } from '../api/socket';
+  handleSocketConnection()
   const store = useStore()
   const router = useRouter()
 

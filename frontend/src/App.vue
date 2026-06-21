@@ -1,9 +1,11 @@
 <script setup>
+import NotifyManager from './components/NotifyManager.vue';
 </script>
 
 <template>
   <h1>Казино Максон</h1>
   <RouterView></RouterView>
+  <NotifyManager/>
 </template>
 
 <style>

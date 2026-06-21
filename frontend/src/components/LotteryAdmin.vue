@@ -10,7 +10,7 @@
   import seven from '../assets/seven.png'
   import confetti from '../assets/confetti.gif'
   import { api } from '../api';
-  import { useStore } from '../store';
+  import { useStore } from '../store.js';
 
   const store = useStore()
 

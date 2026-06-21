@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const sqlite3 = require('sqlite3').verbose()
 const cookieParser = require("cookie-parser");
+const WebSocket = require('ws');
 
 const db = new sqlite3.Database(
     './database.db', 
@@ -61,6 +62,38 @@ const manageCurrentUser = (req, res, cb) => {
     })
 } 
 
+const handleSocketAuth = async (token, ws) => {
+    console.log('handleSocketAuth');
+    
+    const session = await dbGet(`SELECT * from sessions WHERE token= ?`, [token])
+
+    console.log('session', session);
+
+    if (!session) {
+        ws.send(JSON.stringify({
+            type: 'error',
+            message: 'Сессия не найдена'
+        }))
+    }
+    const user = await dbGet(`SELECT * from users WHERE id=?`, [session.userId])
+    console.log('user', user);
+
+    connections.set(user.id, ws)
+}
+
+const  sendToUser = (userId, data) => {
+    console.log('sendToUser');
+    
+  const ws = connections.get(userId);
+    console.log('ws exists', !!ws);
+
+    console.log('ws open', ws.readyState);
+
+  if (ws?.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(data));
+  }
+}
+
 const createSession = (userId, db) => {
     const token = String(Number.parseInt(Math.floor(Math.random()*99999999999)))
     db.run(`DELETE from sessions WHERE userId=?`,[userId])
@@ -80,6 +113,21 @@ const port = 8081
 
 app.use(express.json())
 app.use(cors())
+
+
+const wss = new WebSocket.Server({ port: 8080 });
+
+const connections = new Map()
+
+wss.on('connection', (ws, request, client) => {
+    console.log('Client connected');
+    ws.on('message', async (rawData) => {
+        const data = JSON.parse(rawData)
+        if (data.type === 'auth') {
+            await handleSocketAuth(data.token, ws)
+        }
+    })
+});
 
 app.listen(port, () => {
     console.log('Работаем на порте ' + port)
@@ -131,9 +179,7 @@ app.post('/user', async (req, res) => {
                 'INSERT INTO users( name, code, chips, lotteryTicket, isAdmin) VALUES(?,?,?,?,?)',
                 [name, code, 1000, "", false],
                 (err) => {
-                    if (err) { return console.error(err) }
-                    console.log('smth');
-                    
+                    if (err) { return console.error(err) }                    
                     res.status(200).send('ok')
                 }
             )
@@ -183,6 +229,9 @@ app.put('/send-chips', async (req, res) => {
                     'UPDATE users SET chips = ? WHERE id = ?',
                     [reciever.chips + sum, recieverId]
                 )
+
+                sendToUser(recieverId, {type: 'chips',giver, sum})
+
 
                 res.status(200).send(
                     giver.isAdmin ? 'ok but admin' : 'ok'
