@@ -2,35 +2,37 @@
 <script setup>
   import { ref } from 'vue';
   import heart from '../assets/heart.png'
-
+  import { receiveLikeListener } from "../api/socket";
+  receiveLikeListener((name)=> {
+    like(name)
+  })
   const inputLink = ref('')
   const link = ref('')
   const heartCount = ref(0)
   const isFullScreen = ref(false)
+  
   const onError = () =>{
     link.value = ''
   }
 
   const getVideo = () => {
     heartCount.value = 0
-    setInterval(like, 500)
     link.value = inputLink.value.replace('watch?v=','embed/')
   }
 
 
-  const like = () => {
+  const like = (name) => {
         
     heartCount.value++
     hearstQue.value.push({
       id: Date.now(),
       x: Math.random() * window.screen.width, 
       y: Math.random() * window.screen.height, 
+      name,
     })
   }
 
   const toggleFullScreen = () => {
-    console.log('toggleFullScreen');
-    
     isFullScreen.value = !isFullScreen.value
   }
   const hearstQue = ref([])
@@ -39,7 +41,6 @@
 <template>
   <input v-model="inputLink" class="pixel-border" type="text" placeholder="Ссылка">
   <button class="pixel-border" @click="getVideo">Загрузить</button>
-  <button class="pixel-border" @click="like">Like</button>
   <iframe :class="{fullscreen: isFullScreen}" :src="link" frameborder="0"></iframe>
   <div class="hearts">
     <div class="karaoke-ui">
@@ -49,13 +50,19 @@
       </button>
 
     </div>
-    <img 
+    <div 
       v-for="h in hearstQue" 
-      :key="h.id" 
-      class="heart" 
-      :src="heart" 
+      class="heart-container" 
       :style="{ top: h.y + 'px', left: h.x + 'px'}"
-    >
+      :key="h.id"
+      >
+      <img 
+        class="heart" 
+        :src="heart" 
+      >
+      <span class="heart-name">{{ h.name }}</span>
+    </div>
+    
   </div>
 </template>
 
@@ -70,15 +77,23 @@
     pointer-events: none
   }
 
-  .heart {
-    height: 50px;
-    width: 50px;
+  .heart-container {
     position: absolute;
     animation: flying 4s;
-    top: 50%;
-    left: 50%;
     z-index: 999;
     opacity: 0;
+  }
+
+  .heart {
+    position: absolute;
+    height: 50px;
+    width: 50px;
+  }
+
+  .heart-name {
+    position: absolute;
+    left: 0;
+    bottom: 0;
   }
 
   @keyframes flying {

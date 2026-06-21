@@ -74,11 +74,14 @@ const handleSocketAuth = async (token, ws) => {
             type: 'error',
             message: 'Сессия не найдена'
         }))
+        return
     }
     const user = await dbGet(`SELECT * from users WHERE id=?`, [session.userId])
     console.log('user', user);
 
     connections.set(user.id, ws)
+    console.log(connections.keys);
+    
 }
 
 const  sendToUser = (userId, data) => {
@@ -87,7 +90,7 @@ const  sendToUser = (userId, data) => {
   const ws = connections.get(userId);
     console.log('ws exists', !!ws);
 
-    console.log('ws open', ws.readyState);
+    console.log('ws open', ws?.readyState);
 
   if (ws?.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify(data));
@@ -123,8 +126,13 @@ wss.on('connection', (ws, request, client) => {
     console.log('Client connected');
     ws.on('message', async (rawData) => {
         const data = JSON.parse(rawData)
+        console.log(data, new Date());
+        
         if (data.type === 'auth') {
             await handleSocketAuth(data.token, ws)
+        }
+        if (data.type ==='like') {
+            sendToUser(1, {type: 'like', name: data.name})
         }
     })
 });

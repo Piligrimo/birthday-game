@@ -6,6 +6,7 @@ import { useStore } from './store'
 import Admin from './pages/Admin.vue'
 import SendingMoney from './pages/SendingMoney.vue'
 import Lottery from './pages/Lottery.vue'
+import KaraokeVote from './pages/KaraokeVote.vue'
 
 const routes = [
   { path: '/', redirect: '/my/sending', meta: {shouldBeAuthed: true} },
@@ -20,6 +21,10 @@ const routes = [
       { 
         path: 'lottery', 
         component: Lottery, 
+      },
+      { 
+        path: 'karaoke', 
+        component: KaraokeVote, 
       },
     ],
     meta: {shouldBeAuthed: true},
